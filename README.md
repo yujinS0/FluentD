@@ -124,5 +124,17 @@ DEB Package를 사용해서 설치를 진행한다.
 
 
 
+### 자주 사용하는 pulgin 리스트
+
+
+#### record_transformer 
+- 새로운 필드를 추가하거나, 기존 필드 값을 변경할 때 사용 [filter_record_transformer_문서](https://docs.fluentd.org/filter/record_transformer)
+- filter (로그 데이터를 가공해야할 때 사용) plugin
+
+#### rewrite_tag_filter
+- 태그를 변경하여 다시 처리 프로세스를 타게할 때 사용 [out_rewrite_tag_filter 문서](https://docs.fluentd.org/output/rewrite_tag_filter)
+- 로그 타입에 따른 처리가 필요할 때 rewrite_tag_filter를 활용해서, 데이터 필드를 tag로 변환한 후 변환된 tag에 의해 패턴 매칭을 적용시키는 것으로 문제 해결 가능
+- match/output plugin
+
 
 

@@ -73,7 +73,7 @@ Input -> Paser 를 걸쳐 전달된 데이터를 가공할 때 사용하는 Plug
 	- 데이터의 특정 필드를 삭제하는 기능
 
 #### Output
-필터링되고 가공된 데이터를 로그 저장소로 보내는 Pulgin이다.
+필터링되고 가공된 데이터를 로그 저장소로 보내는 plugin이다.
 Output Plugin은 1개의 모드로만 동작한다.
 ["제공되는 Output Plugins"](https://docs.fluentd.org/output)
 - ex. copy, file, null, roundrobin, stdout, exec_filter, forward, exec ...
@@ -119,12 +119,7 @@ DEB Package를 사용해서 설치를 진행한다.
 `lsb_release -a` 명령어로 OS 버전을 확인하고, 해당 버전에 맞는 설치 명령어를 사용한다.
 
 
-### Directives 리스트
-기본적으로 숙지해야하는 Directives 목록입니다.
-
-
-
-### 자주 사용하는 pulgin 리스트
+### Directives 및 자주 사용하는 plugin 리스트
 
 
 #### record_transformer 
@@ -135,6 +130,128 @@ DEB Package를 사용해서 설치를 진행한다.
 - 태그를 변경하여 다시 처리 프로세스를 타게할 때 사용 [out_rewrite_tag_filter 문서](https://docs.fluentd.org/output/rewrite_tag_filter)
 - 로그 타입에 따른 처리가 필요할 때 rewrite_tag_filter를 활용해서, 데이터 필드를 tag로 변환한 후 변환된 tag에 의해 패턴 매칭을 적용시키는 것으로 문제 해결 가능
 - match/output plugin
+
+
+### 실습으로 설명하는  FluentD 사용법
+#### Input
+##### <source>
+
+- @type tail : 텍스트 파일 형태의 로그 파일을 읽어서 input으로 사용한다는 의미 (로그 파일의 path와 tag 지정 필수)
+- <parse> : 데이터 포맷 변경
+
+```xml
+<source> # input 
+  @type tail ## 텍스트 파일 형태의 로그 파일을 읽어서 input으로 사용 (소스파일의 path와 tag 지정 필수)
+  tag file.test ## * 사용 시 파일 경로로 대체
+  path /tmp/log/test.log
+  read_from_head true
+  <parse> # parser (데이터 포맷 변경)
+    @type /^\[(?<logtime>[^\]]*)\] (?<type>[^ ]*) (?<msg>.*)$/
+    time_key logtime
+    time_format %Y-%m-%d %H:%M:%S %z
+  </parse>
+</source>
+```
+
+#### Output 
+##### <match> 
+- @type file : 파일로 저장
+- <buffer> : 데이터를 일시적으로 저장하는 영역 지정
+
+``` xml
+<match **> # output (외부로 보내는)
+  @type file
+  path /tmp/log/test
+  append true ## 파일 존재 시, 새로운 로그를 파일 끝에 덧붙이는 append 옵션 (file plugin 옵션) 
+                ### append ture :  로그가 한 파일에 기록되며 쌓임.
+                ### append false : 기존 파일 덮어쓰기
+  <buffer> ## 데이터를 일시적으로 저장하는 영역 지정
+    @type memory    ### 버퍼 타입 지정 : RAM , 다른 옵션으로 file 존재
+    timekey 60      ### 버퍼링 시간 설정 (60초) = 즉, 1분동안 모인 로그를 한번에 처리
+    timekey_wait 10 ### 버퍼에서 데이터 비울 때 추가 대기 시간 설정 (10초) = 즉, 청크가 끝난 후 10초 기다린 후 데이터 전송 (데이터 손실 X)
+  </buffer>
+</match>
+``` 
+
+- @type sql : sql 형식으로 저장 (RDBMS)
+
+```xml
+<match **>
+  @type sql
+  host 127.0.0.1
+  port 3306
+  database test
+  adapter mysql2
+  username root
+  password changeme
+  <table>
+    table test
+    column_mapping 'time:created_at, type:log_type, msg:msg'
+  </table>
+</match>
+```
+
+
+- @type rewrite_tag_filter : 태그를 변경하여 다시 처리 프로세스를 타게할 때 사용
+
+```xml
+<match file.**> ##
+  @type rewrite_tag_filter ## rewrite_tag_filter plugin : 태그를 변경하여 다시 처리 프로세스를 타게할 때 사용
+  remove_tag_prefix file ## 태그의 prefix(접두사)를 제거 ex. file.log라면, log만 남게 됨
+  <rule> ## rule : 태그 변경하는 규칙 -> 만약 type이 debug인 경우, 태그를 clear로 변경해라.
+    key type                ### type 필드를 보고
+    pattern /^(?i)DEBUG$/   ### DEBUG라는 패턴이 있는 경우 (i : 대소문자 구분 없이 매칭)
+    tag clear               ### 태그를 clear로 변경
+  </rule>
+  <rule> ## 만약 type이 debug가 아닌 경우, 기존 태그를 그대로 사용.
+    key type
+    pattern /^(?i)DEBUG$/
+    invert true             ### 패턴에 매칭되지 않는 경우 규칙을 사용
+    tag ${tag}              ### 기존 태그를 사용 (${tag}는 현재 레코드의 태그를 의미 = file 접두사가 제거된 태그)
+  </rule>
+</match>
+<match clear> ## clear 태그에 대한 처리 (tag가 clear라면, Output 플러긴을 null로, 즉 무시해라)
+  @type null ## null plugin : 아무것도 하지 않는 플러그인
+</match>
+```
+
+
+
+
+#### Filter
+##### <filter>
+- @type record_transformer : 새로운 필드를 추가하거나, 기존 필드 값 변경 plugin
+
+```xml
+<filter file.log.game.**>
+  @type record_transformer # record_transformer 플러그인 : 새로운 필드를 추가하거나, 기존 필드 값 변경 기능
+  <record>
+    server_id ${tag_parts[3]} # tag의 4번째 부분(태그는 . 으로 구분), 서버 id를 server_id라는 필드로 추가하고 있다.
+  </record>
+</filter>
+```
+
+- @type record_transformer
++ enable_ruby ## 필터에서 루비 스크립트를 사용할 수 있게 기능을 활성화 시키는 부분
+
+```xml
+<filter file.log.game.**>
+  @type record_transformer ##
+  enable_ruby ## 필터에서 루비 스크립트를 사용할 수 있게 기능을 활성화 시키는 부분
+  <record>
+    server_id ${tag_parts[3]}
+    type ${record["type"].gsub('[', '').gsub(']', '')} ## type 필드값에서 대괄호를 제거하는 부분 ( gsub 루비 함수 호출)
+                                                       #### gsub(찾을문자열, 바꿀문자열) : 문자열에서 찾을 문자열을 바꿀 문자열로 바꾸는 함수
+  </record>
+</filter>
+```
+
+
+
+
+
+
+
 
 
 

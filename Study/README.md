@@ -1,4 +1,4 @@
-# FluentD
+# FluentD Study 
 FluentD를 통한 Log 처리 학습 및 실습을 위한 레포지토리
 
 ## 0. Log Management System

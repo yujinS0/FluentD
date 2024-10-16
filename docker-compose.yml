@@ -1,0 +1,82 @@
+version: '3'
+
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: "000930"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+      MYSQL_DATABASE: masterdb
+    ports:
+      - "3310:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - game-network
+    healthcheck:
+        test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p000930"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+        start_period: 30s
+
+  redis:
+    image: redis:latest
+    ports:
+        - "6389:6379"
+    networks:
+        - game-network
+    healthcheck:
+        test: ["CMD", "redis-cli", "ping"]
+        interval: 30s
+        timeout: 10s
+        retries: 5
+        start_period: 30s
+
+  gameserver:
+    build:
+      context: ./gameserver
+      dockerfile: Dockerfile
+    ports:
+      - "5105:8080"
+    depends_on:
+      - mysql
+      - redis
+    environment:
+      ConnectionStrings__MysqlGameDBConnection: "Server=mysql;Database=gamedb;User=root;Password=000930;"
+      ConnectionStrings__MasterDBConnection: "Server=mysql;Database=masterdb;User=root;Password=000930;"
+      ConnectionStrings__RedisGameDBConnection: "redis:6379"
+    networks:
+      - game-network
+  
+  hiveserver:
+    build:
+      context: ./hiveserver
+      dockerfile: Dockerfile
+    ports:
+      - "5284:8080"
+    depends_on:
+      - mysql
+    environment:
+      ConnectionStrings__MysqlHiveDBConnection: "Server=mysql;Database=hivedb;User=root;Password=000930;"
+    networks:
+      - game-network
+
+  matchserver:
+    build:
+      context: ./matchserver
+      dockerfile: Dockerfile
+    ports:
+      - "5259:8080"
+    depends_on:
+      - redis
+    environment:
+      ConnectionStrings__RedisGameDBConnection: "redis:6379"
+    networks:
+      - game-network
+
+networks:
+  game-network:
+
+volumes:
+  mysql-data:

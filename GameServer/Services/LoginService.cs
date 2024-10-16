@@ -63,7 +63,7 @@ public class LoginService : ILoginService
             HiveToken = token
         };
 
-        var response = await client.PostAsJsonAsync("http://localhost:5284/VerifyToken", verifyTokenRequest);
+        var response = await client.PostAsJsonAsync("http://fluentd-hiveserver-1:8080/VerifyToken", verifyTokenRequest);
         
         if (!response.IsSuccessStatusCode)
         {

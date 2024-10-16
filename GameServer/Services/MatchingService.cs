@@ -29,7 +29,7 @@ public class MatchingService : IMatchingService
         var client = _httpClientFactory.CreateClient();
         var request = new MatchRequest { PlayerId = playerId };
 
-        var response = await client.PostAsJsonAsync("http://localhost:5259/RequestMatching", request);
+        var response = await client.PostAsJsonAsync("http://fluentd-matchserver-1:8080/RequestMatching", request);
         if (!response.IsSuccessStatusCode)
         {
             return ErrorCode.InternalError;

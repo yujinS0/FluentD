@@ -69,3 +69,115 @@ ZLogger를 활용하여 콘솔에 JSON 포맷으로 로그가 출력 되도록 합니다.
   - [ ] 기간 내 매칭 요청 수
   - [ ] 기간 내 매칭 성사 수
   - [ ] 기간 내 게임 플레이 수
+
+  
+  ---
+
+ 
+ ### 로그 정의 (예시: 현재 수정중)
+
+ 예시 로그 
+
+  ```json
+  {
+	  "timestamp": "2024-10-16T12:34:56Z",
+	  "userId": "user_12345",
+	  "event": "login",
+	  "eventDetails": {
+		"gameId": "game_67890",
+		"matchId": "match_12345",
+		"result": "win"
+	  },
+	  "sessionId": "session_98765",
+	  "ipAddress": "192.168.1.1",
+	  "duration": 120,
+	  "meta": {
+		"appVersion": "1.0.0",
+		"deviceModel": "iPhone12"
+	  }
+	}
+
+```
+
+테이블 구조
+
+
+```sql
+
+CREATE TABLE user_activity_logs (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    timestamp DATETIME NOT NULL,         -- 로그 발생 시간
+    userId VARCHAR(255) NOT NULL,        -- 유저 ID
+    event VARCHAR(50) NOT NULL,          -- 이벤트 종류 (login, play_game, request_match, complete_match 등)
+    gameId VARCHAR(255) NULL,            -- 게임 ID (게임 관련 이벤트에서 사용)
+    matchId VARCHAR(255) NULL,           -- 매칭 ID (매칭 관련 이벤트에서 사용)
+    result VARCHAR(50) NULL,             -- 결과 (게임 완료 시 win/lose 등)
+    duration INT NULL,                   -- 게임 시간 또는 세션 시간(초 단위)
+    ipAddress VARCHAR(45) NULL           -- 사용자 IP 주소 (선택 사항)
+);
+
+```
+
+
+fluentd 설정 파일 예시
+```xml
+<source>
+	@type forward
+	port 24224
+</source>
+
+<match app.log>
+	@type mysql
+	host 127.0.0.1
+	port 3306
+	database your_database
+	username your_username
+	password your_password
+	table user_activity_logs
+	column_mapping timestamp:timestamp, log_data:log
+</match>
+```
+
+
+zlogger C# 코드 예시
+
+```csharp
+public class LoggerService
+{
+    private readonly ILogger _logger;
+
+    public LoggerService(ILogger<LoggerService> logger)
+    {
+        _logger = logger;
+    }
+
+    public void LogLogin(string userId, string platform, string ipAddress)
+    {
+        var logData = new
+        {
+            timestamp = DateTime.UtcNow,
+            userId = userId,
+            event = "login",
+            platform = platform,
+            ipAddress = ipAddress
+        };
+
+        _logger.ZLogInformationWithPayload(logData, "User {userId} logged in");
+    }
+
+    public void LogGamePlay(string userId, string gameId, int duration)
+    {
+        var logData = new
+        {
+            timestamp = DateTime.UtcNow,
+            userId = userId,
+            event = "play_game",
+            gameId = gameId,
+            duration = duration
+        };
+
+        _logger.ZLogInformationWithPayload(logData, "User {userId} played game {gameId}");
+    }
+}
+
+```

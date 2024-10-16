@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: 000930
       MYSQL_DATABASE: masterdb
     ports:
-      - "3306:3306"
+      - "3310:3306"
     volumes:
       - mysql-data:/var/lib/mysql
     networks:
@@ -22,7 +22,7 @@ services:
   redis:
     image: redis:latest
     ports:
-        - "6379:6379"
+        - "6389:6379"
     networks:
         - game-network
     healthcheck:

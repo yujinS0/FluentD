@@ -182,7 +182,7 @@ ZLogger를 활용하여 콘솔에 JSON 포맷으로 로그가 출력 되도록 합니다.
     CREATE TABLE `game_logs`.`matching_logs`(
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
         playerId VARCHAR(255) NOT NULL,    -- 매칭을 요청한 플레이어 ID
-        time DATETIME NOT NULL,            -- 매칭 요청 또는 성사 시각
+        timestamp DATETIME NOT NULL,            -- 매칭 요청 또는 성사 시각
         tag VARCHAR(50) NOT NULL           -- 'match_request' 또는 'match_success' 구분을 위한 태그
     );
 

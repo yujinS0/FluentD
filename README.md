@@ -67,56 +67,250 @@ ZLogger를 활용하여 콘솔에 JSON 포맷으로 로그가 출력 되도록 합니다.
 - [ ] Time-Based Statistics
   - [ ] 기간 내 로그인 인구
   - [ ] 기간 내 매칭 요청 수
-  - [ ] 기간 내 매칭 성사 수
-  - [ ] 기간 내 게임 플레이 수
+  - [ ] 기간 내 매칭 성사 수 (매칭 요청 중 성사된 것의 개수)
+  - [ ] 기간 내 게임 플레이 수 (정상적으로 끝난 game 수)
 
   
   ---
 
  
- ### 로그 정의 (예시: 현재 수정중)
+ ### 로그 모델 정의 
+ 
+1. 로그인 성공 시 (Daily Active Users)
+ 
+ - 로그인 성공 여부는 Daily Active Users와 로그인 횟수 통계에 영향
+ - 필드
+    + action : login_success
+    + playerId
+ - 예시
+    ```json
+    {
+        "timestamp":"2024-10-17T15:58:55.4085597+09:00",
+        "tag":"Action.Login",
+        "context":{
+            "action":"login_success",
+            "playerId":"test1@gmail.com"
+        }
+    }
+    ```
+  
+2. 매칭 요청 성공 시 (Time-Based Statistics 기간 내 매칭 요청 수)
 
- 예시 로그 
+ - 필드
+    + action : match_request
+    + playerId
+ - 예시
+    ```json
+    {
+        "timestamp":"2024-10-17T15:58:55.4085597+09:00",
+        "tag":"Action.RequestMatching",
+        "context":{
+            "action":"match_request",
+            "playerId":"test2@gmail.com"
+        }
+    }
+    ``` 
 
-  ```json
-  {
-	  "timestamp": "2024-10-16T12:34:56Z",
-	  "userId": "user_12345",
-	  "event": "login",
-	  "eventDetails": {
-		"gameId": "game_67890",
-		"matchId": "match_12345",
-		"result": "win"
-	  },
-	  "sessionId": "session_98765",
-	  "ipAddress": "192.168.1.1",
-	  "duration": 120,
-	  "meta": {
-		"appVersion": "1.0.0",
-		"deviceModel": "iPhone12"
-	  }
-	}
+ 3. 매칭 성사 시 (Time-Based Statistics 기간 내 매칭 성사 수)
+ 
+ - 필드
+    + action : match_success
+    + playerId
+ 
+ - 예시
+    ```json
+    {
+        "timestamp":"2024-10-17T16:02:27.7802798+09:00",
+        "tag":"Action.CheckAndInitializeMatch",
+        "context":{
+            "action":"match_success",
+            "playerId":"test2@gmail.com"
+        }
+    }
+    ``` 
+ 
+ 4. 게임 종료 시 (Time-Based Statistics 기간 내 게임 플레이 수)
 
-```
+ - 필드
+    + action : game_end
+    + winnerId
+    + loserId
 
-테이블 구조
+ - 예시
+    ```json
+    {
+        "timestamp":"2024-10-17T16:02:27.7802798+09:00",
+        "tag":"Action.UpdateGameResult",
+        "context":{
+            "action":"game_end",
+            "winnerId":"test2@gmail.com",
+            "loserId":"test1@gmail.com"
+        }
+    }
+    ``` 
+ 
 
+
+
+ <br>
+
+ ### 로그 저장 테이블 구조 정의
+
+ ```sql
+ create database game_logs;
+
+ ```
+
+ #### 로그인 로그 테이블 login_logs
+
+  ```sql
+    CREATE TABLE `game_logs`.`login_logs`(
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        playerId VARCHAR(255) NOT NULL,    -- 플레이어 ID
+        timestamp DATETIME NOT NULL        -- 로그인 발생 시간
+    );
+
+ ```
+ - 로그인 관련 정보를 기록하는 테이블. 
+ - Daily Active Users 및 로그인 횟수 계산에 사용됩니다.
+
+
+ 
+ #### 매칭 로그 테이블 matching_logs
+
+  ```sql
+    CREATE TABLE `game_logs`.`matching_logs`(
+        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+        playerId VARCHAR(255) NOT NULL,    -- 매칭을 요청한 플레이어 ID
+        time DATETIME NOT NULL,            -- 매칭 요청 또는 성사 시각
+        tag VARCHAR(50) NOT NULL           -- 'match_request' 또는 'match_success' 구분을 위한 태그
+    );
+
+ ```
+ - 매칭 요청과 성사 정보를 기록하는 테이블. 
+ - 매칭 요청 수와 매칭 성사 수 통계에 사용됩니다.
+
+
+
+ #### 게임 로그 테이블 play_logs
+
+  ```sql
+	CREATE TABLE `game_logs`.`play_logs`(
+		id BIGINT AUTO_INCREMENT PRIMARY KEY,
+		winnerId VARCHAR(255) NOT NULL,    -- 승자 ID
+		loserId VARCHAR(255) NOT NULL,     -- 패자 ID
+		timestamp DATETIME NOT NULL        -- 게임 종료 시간
+	);
+
+ ```
+
+ - 게임 결과를 기록하는 테이블.
+ - 게임 플레이 수 및 게임 승패 통계에 사용됩니다.
+
+---
+
+### 통계 쿼리 예시
+
+#### 1. **Daily Active Users (DAU)**
+   - 특정 날짜에 로그인한 고유 플레이어 수를 계산합니다.
 
 ```sql
-
-CREATE TABLE user_activity_logs (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    timestamp DATETIME NOT NULL,         -- 로그 발생 시간
-    userId VARCHAR(255) NOT NULL,        -- 유저 ID
-    event VARCHAR(50) NOT NULL,          -- 이벤트 종류 (login, play_game, request_match, complete_match 등)
-    gameId VARCHAR(255) NULL,            -- 게임 ID (게임 관련 이벤트에서 사용)
-    matchId VARCHAR(255) NULL,           -- 매칭 ID (매칭 관련 이벤트에서 사용)
-    result VARCHAR(50) NULL,             -- 결과 (게임 완료 시 win/lose 등)
-    duration INT NULL,                   -- 게임 시간 또는 세션 시간(초 단위)
-    ipAddress VARCHAR(45) NULL           -- 사용자 IP 주소 (선택 사항)
-);
-
+SELECT COUNT(DISTINCT playerId) AS daily_active_users
+FROM login_logs
+WHERE DATE(timestamp) = CURDATE();
 ```
+
+- **설명**: `DISTINCT`를 사용하여 중복 로그인을 제외한 고유한 플레이어 수를 구합니다. 날짜는 `CURDATE()`로 오늘의 날짜만 필터링합니다.
+
+
+
+#### 2. **User-Specific Statistics**
+
+##### 2.1 **로그인 횟수**
+   - 각 플레이어의 로그인 횟수를 계산합니다.
+
+```sql
+SELECT playerId, COUNT(*) AS login_count
+FROM login_logs
+GROUP BY playerId;
+```
+
+- **설명**: 각 플레이어의 `playerId`를 기준으로 그룹화한 후, 로그인한 횟수를 계산합니다.
+
+##### 2.2 **게임 플레이 횟수**
+   - 각 플레이어의 게임 플레이 횟수를 계산합니다.
+
+```sql
+SELECT playerId, COUNT(*) AS play_count
+FROM (
+    SELECT winnerId AS playerId FROM play_logs
+    UNION ALL
+    SELECT loserId AS playerId FROM play_logs
+) AS combined_players
+GROUP BY playerId;
+```
+
+- **설명**: `winnerId`와 `loserId` 모두를 하나의 `playerId`로 합친 후, 각 플레이어의 게임 참여 횟수를 계산합니다. **UNION ALL**을 사용하여 승자와 패자를 모두 포함한 후 그룹화합니다.
+
+
+#### 3. **Time-Based Statistics**
+
+##### 3.1 **기간 내 로그인 인구**
+   - 특정 기간 동안 로그인한 고유 플레이어 수를 계산합니다.
+
+```sql
+SELECT COUNT(DISTINCT playerId) AS unique_logins
+FROM login_logs
+WHERE timestamp BETWEEN '2024-10-01' AND '2024-10-31';
+```
+
+- **설명**: `DISTINCT`를 사용하여 중복 로그인을 제외한 고유한 플레이어 수를 구합니다. 특정 기간 내에 발생한 로그인을 필터링합니다.
+
+##### 3.2 **기간 내 매칭 요청 수**
+   - 특정 기간 동안 발생한 매칭 요청 수를 계산합니다.
+
+```sql
+SELECT COUNT(*) AS match_request_count
+FROM matching_logs
+WHERE tag = 'match_request'
+  AND time BETWEEN '2024-10-01' AND '2024-10-31';
+```
+
+- **설명**: 매칭 요청 태그가 `"match_request"`인 로그만 필터링하여 매칭 요청 수를 계산합니다.
+
+##### 3.3 **기간 내 매칭 성사 수 (매칭 요청 중 성사된 것의 개수)**
+   - 특정 기간 동안 매칭 요청 중 성사된 매칭 수를 계산합니다.
+
+```sql
+SELECT COUNT(*) AS match_success_count
+FROM matching_logs
+WHERE tag = 'match_success'
+  AND time BETWEEN '2024-10-01' AND '2024-10-31';
+```
+
+- **설명**: 매칭 성사 태그가 `"match_success"`인 로그만 필터링하여 매칭 성사 수를 계산합니다.
+
+##### 3.4 **기간 내 게임 플레이 수 (정상적으로 끝난 게임 수)**
+   - 특정 기간 동안 종료된 게임 수를 계산합니다.
+
+```sql
+SELECT COUNT(*) AS game_play_count
+FROM play_logs
+WHERE timestamp BETWEEN '2024-10-01' AND '2024-10-31';
+```
+
+- **설명**: `play_logs` 테이블에서 게임 종료 시간이 특정 기간 내에 있는 게임의 개수를 계산합니다.
+
+
+
+<br>
+<br>
+<br>
+
+ ---
+
+<br>
+
 
 
 fluentd 설정 파일 예시
@@ -136,48 +330,4 @@ fluentd 설정 파일 예시
 	table user_activity_logs
 	column_mapping timestamp:timestamp, log_data:log
 </match>
-```
-
-
-zlogger C# 코드 예시
-
-```csharp
-public class LoggerService
-{
-    private readonly ILogger _logger;
-
-    public LoggerService(ILogger<LoggerService> logger)
-    {
-        _logger = logger;
-    }
-
-    public void LogLogin(string userId, string platform, string ipAddress)
-    {
-        var logData = new
-        {
-            timestamp = DateTime.UtcNow,
-            userId = userId,
-            event = "login",
-            platform = platform,
-            ipAddress = ipAddress
-        };
-
-        _logger.ZLogInformationWithPayload(logData, "User {userId} logged in");
-    }
-
-    public void LogGamePlay(string userId, string gameId, int duration)
-    {
-        var logData = new
-        {
-            timestamp = DateTime.UtcNow,
-            userId = userId,
-            event = "play_game",
-            gameId = gameId,
-            duration = duration
-        };
-
-        _logger.ZLogInformationWithPayload(logData, "User {userId} played game {gameId}");
-    }
-}
-
 ```

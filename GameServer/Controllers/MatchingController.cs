@@ -12,12 +12,12 @@ namespace GameServer.Controllers;
 
 [ApiController]
 [Route("[controller]")]
-public class MatchingController : ControllerBase
+public class MatchingController : BaseController<MatchingController> // ControllerBase
 {
     private readonly ILogger<MatchingController> _logger;
     private readonly IMatchingService _matchingService;
 
-    public MatchingController(ILogger<MatchingController> logger, IMatchingService matchingService)
+    public MatchingController(ILogger<MatchingController> logger, IMatchingService matchingService) : base(logger)
     {
         _logger = logger;
         _matchingService = matchingService;
@@ -37,6 +37,12 @@ public class MatchingController : ControllerBase
             };
         }
 
+        ActionLog(new
+        {
+            action = "match_success",
+            playerId = request.PlayerId
+        });
+
         return new MatchCompleteResponse
         {
             Result = result,
@@ -47,6 +53,12 @@ public class MatchingController : ControllerBase
     public async Task<MatchResponse> RequestMatching([FromBody] MatchRequest request)
     {
         var result = await _matchingService.RequestMatching(request.PlayerId);
+
+        ActionLog(new
+        {
+            action = "match_request",
+            playerId = request.PlayerId
+        });
 
         return new MatchResponse
         {

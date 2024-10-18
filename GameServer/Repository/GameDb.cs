@@ -242,8 +242,18 @@ public class GameDb : IGameDb
                     return false;
                 }
 
-                _logger.LogInformation("Updated game result. Winner: {WinnerId}, Wins: {Wins}, Exp: {WinnerExp}, Loser: {LoserId}, Losses: {Losses}, Exp: {LoserExp}",
-                    winnerId, winnerData.Win, winnerData.Exp, loserId, loserData.Lose, loserData.Exp);
+                // 기존 로그
+                //_logger.LogInformation("Updated game result. Winner: {WinnerId}, Wins: {Wins}, Exp: {WinnerExp}, Loser: {LoserId}, Losses: {Losses}, Exp: {LoserExp}",
+                //    winnerId, winnerData.Win, winnerData.Exp, loserId, loserData.Lose, loserData.Exp);
+
+                // 게임 종료 시점 로그 기록 (LoggerHelper(Zlogger) 사용)
+                LoggerHelper.ActionLog(_logger, new
+                {
+                    action = "game_end",
+                    winnerId = winnerId,
+                    loserId = loserId,
+                    //timestamp = DateTime.UtcNow
+                });
 
                 await transaction.CommitAsync();
                 return true;

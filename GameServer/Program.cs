@@ -3,6 +3,9 @@ using GameServer.Services.Interfaces;
 using GameServer.Services;
 using MatchServer.Services;
 using GameServer.Repository.Interfaces;
+using ZLogger;
+using System.Text.Json;
+using ZLogger.Formatters;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -35,9 +38,30 @@ builder.Services.AddScoped<IFriendService, FriendService>();
 
 builder.Services.AddHttpClient();
 
-// 로깅 설정
+// 기존 로깅 설정
+//builder.Logging.ClearProviders();
+//builder.Logging.AddConsole();
+//builder.Logging.SetMinimumLevel(LogLevel.Information);
+
+// 로깅 설정 (ZLogger를 통한 JSON 로그 설정)
 builder.Logging.ClearProviders();
-builder.Logging.AddConsole();
+builder.Logging.AddZLoggerConsole(options =>
+{
+    options.UseJsonFormatter(formatter =>
+    {
+        formatter.JsonPropertyNames = JsonPropertyNames.Default with
+        {
+            Category = JsonEncodedText.Encode("category"),
+            Timestamp = JsonEncodedText.Encode("timestamp"),
+            LogLevel = JsonEncodedText.Encode("logLevel"),
+            Message = JsonEncodedText.Encode("message")
+        };
+
+        formatter.IncludeProperties = IncludeProperties.Timestamp | IncludeProperties.ParameterKeyValues;
+    });
+});
+
+// 로그 레벨 설정
 builder.Logging.SetMinimumLevel(LogLevel.Information);
 
 builder.Services.AddControllers();

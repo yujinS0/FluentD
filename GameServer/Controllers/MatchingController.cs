@@ -37,7 +37,7 @@ public class MatchingController : BaseController<MatchingController> // Controll
             };
         }
 
-        ActionLog(new
+        LoggerHelper.ActionLog(_logger, new
         {
             action = "match_success",
             playerId = request.PlayerId
@@ -54,7 +54,7 @@ public class MatchingController : BaseController<MatchingController> // Controll
     {
         var result = await _matchingService.RequestMatching(request.PlayerId);
 
-        ActionLog(new
+        LoggerHelper.ActionLog(_logger, new
         {
             action = "match_request",
             playerId = request.PlayerId

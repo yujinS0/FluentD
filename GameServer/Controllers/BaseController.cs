@@ -15,9 +15,9 @@ public abstract class BaseController<T> : ControllerBase
         _logger = logger;
     }
 
-    protected void ActionLog(object context, [CallerMemberName] string? tag = null) // 호출된 메서드 이름을 tag로 사용
-    {
-        tag = _logPrefix + tag;
-        _logger.ZLogInformation($"[{tag:json}] {context:json}");
-    }
+    //protected void ActionLog(object context, [CallerMemberName] string? tag = null) // 호출된 메서드 이름을 tag로 사용
+    //{
+    //    tag = _logPrefix + tag;
+    //    _logger.ZLogInformation($"[{tag:json}] {context:json}");
+    //}
 }

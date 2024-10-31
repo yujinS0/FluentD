@@ -35,7 +35,7 @@ public class LoginController : BaseController<LoginController> // ControllerBase
             if (result == ErrorCode.None)
             {
                 // 성공 로그를 JSON 형식으로 기록
-                ActionLog(new
+                LoggerHelper.ActionLog(_logger, new
                 {
                     action = "login_success",
                     playerId = request.PlayerId,
@@ -45,7 +45,7 @@ public class LoginController : BaseController<LoginController> // ControllerBase
             else
             {
                 // 실패 로그를 JSON 형식으로 기록
-                ActionLog(new
+                LoggerHelper.ActionLog(_logger, new
                 {
                     action = "login_failed",
                     playerId = request.PlayerId,
@@ -59,7 +59,7 @@ public class LoginController : BaseController<LoginController> // ControllerBase
         catch (HttpRequestException e)
         {
             // 예외 처리 및 로그 기록
-            ActionLog(new
+            LoggerHelper.ActionLog(_logger, new
             {
                 action = "login_error_http",
                 exception = e.Message,
@@ -70,7 +70,7 @@ public class LoginController : BaseController<LoginController> // ControllerBase
         catch (JsonException e)
         {
             // JSON 파싱 예외 처리 및 로그 기록
-            ActionLog(new
+            LoggerHelper.ActionLog(_logger, new
             {
                 action = "login_error_json",
                 exception = e.Message,
@@ -81,7 +81,7 @@ public class LoginController : BaseController<LoginController> // ControllerBase
         catch (Exception e)
         {
             // 일반 예외 처리 및 로그 기록
-            ActionLog(new
+            LoggerHelper.ActionLog(_logger, new
             {
                 action = "login_error_unexpected",
                 exception = e.Message,

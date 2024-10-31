@@ -312,7 +312,6 @@ WHERE timestamp BETWEEN '2024-10-01' AND '2024-10-31';
 <br>
 
 
-
 fluentd 설정 파일 예시
 ```xml
 <source>
@@ -331,3 +330,42 @@ fluentd 설정 파일 예시
 	column_mapping timestamp:timestamp, log_data:log
 </match>
 ```
+
+
+----
+
+# Feedback
+
+## ZLogger 활용
+
+- `BaseController` & `LoggerHelper` 
+   + 2개의 클래스가 동일한 목적 `ActionLog()` 을 수행하고 있음
+   + 따라서 BaseController를 제거하고 동일하게 전역에서 LoggerHelper를 이용하도록 수정
+
+## FluentD 활용
+
+- Buffer 사용 권장
+   + Buffer 플러그인은 Fluentd output plugin 에서 사용되는 pluggable한 기능
+   + 로그 유실 방지를 위해 쓰이기 때문에 현재 사용되는 output plugin 에 적용해 보는 것 추천
+   + Buffer 는 메모리 형태와 파일 형태 두가지로 제공되며, 메모리 버퍼는 fluentd 종료 시 유실 되기 때문에 파일 형태가 추천
+
+
+- Secondary 사용 권장
+   + Secondary 플러그인은 전송에 실패한 로그를 지정한 경로에 저장함
+   + 로그 유실 방지 및 전송 실패 원인 분석을 위해 사용 권장
+
+
+- Fluentd 역할 분리 구성 권장
+   + 서버와 데이터베이스가 주로 다른위치에 있기 때문에, 
+     효율적으로 부하를 분산 시키기 위해 전송용 Fluentd(Forwarder), 가공 및 저장용 Fluentd(Aggregator)가 분리되어 구성되는 것이 권장
+     + Forwarder : 전송용 Fluentd
+     + Aggregator : 가공 및 저장용 Fluentd
+
+- @include 사용 권장
+   + 데이터베이스 저장시에, 테이블별 DB 설정이 반복되는 것을 방지하기 위해 conf 파일을 분리하여 @include 사용 권장
+
+
+
+## Project & Structure
+
+- UTF-8 Encoding 사용

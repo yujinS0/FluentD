@@ -1,6 +1,14 @@
-version: '3'
+﻿version: '3'
 
 services:
+  # fluentd:
+  #   image: fluent/fluentd:edge 
+  #   ports:
+  #     - "24224:24224"           
+  #   volumes:
+  #     - ./fluent.conf:/fluentd/etc/fluent.conf
+  #     - ./logs:/fluentd/log
+
   mysql:
     image: mysql:8.0
     environment:
@@ -48,6 +56,11 @@ services:
       ConnectionStrings__RedisGameDBConnection: "redis:6379"
     networks:
       - game-network
+    # logging:
+    #   driver: "fluentd"
+    #   options:
+    #     fluentd-address: localhost:24224
+    #     tag: docker.gameserver
   
   hiveserver:
     build:

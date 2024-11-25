@@ -1,0 +1,126 @@
+version: "3.5"
+
+services:
+  fluentd-forwarder-1:
+    container_name: fluentd-forwarder-1
+    build:
+      context: ./FluentD/Forwarder
+    depends_on:
+      - fluentd-aggregator
+    networks:
+      - game-network
+    ports:
+      - "24227:24224"
+
+  fluentd-forwarder-2:
+    build:
+      context: ./FluentD/Forwarder
+    container_name: fluentd-forwarder-2
+    depends_on:
+      - fluentd-aggregator
+    networks:
+      - game-network
+    ports:
+      - "24226:24224"
+
+  fluentd-aggregator:
+    container_name: fluentd-aggregator
+    build:
+      context: ./FluentD/Aggregator
+    depends_on:
+      - mysql
+    networks:
+      - game-network
+    ports:
+      - "24225:24224"
+
+  gameserver:
+    restart: always
+    container_name: gameserver
+    build:
+      context: .
+      dockerfile: ./gameserver
+    depends_on:
+      - mysql
+      - redis
+      - fluentd-forwarder-1
+    environment:
+      ConnectionStrings__MysqlGameDBConnection: "Server=mysql;Database=gamedb;User=root;Password=000930;"
+      ConnectionStrings__MasterDBConnection: "Server=mysql;Database=masterdb;User=root;Password=000930;"
+      ConnectionStrings__RedisGameDBConnection: "redis:6379"
+    ports:
+      - "5105:8080"
+    networks:
+      - game-network
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "localhost:24227"
+        fluentd-async-connect: "true"
+        tag: server.game
+
+  hiveserver:
+    container_name: hiveserver
+    build:
+      context: .
+      dockerfile: ./hiveserver
+    depends_on:
+      - mysql
+    environment:
+      ConnectionStrings__MysqlHiveDBConnection: "Server=mysql;Database=hivedb;User=root;Password=000930;"
+    ports:
+      - "5284:8080"
+    networks:
+      - game-network
+
+  matchserver:
+    build:
+      context: .
+      dockerfile: ./MatchAPIServer/Dockerfile
+    container_name: matchserver
+    depends_on:
+      - redis
+      - fluentd-forwarder-2
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_HTTP_PORTS=9000
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    networks:
+      - game-network
+    logging:
+      driver: fluentd
+      options:
+        fluentd-address: "localhost:24226"
+        fluentd-async-connect: "true"
+        tag: server.match
+
+  mysql:
+    build:
+      context: ./Database
+    container_name: database
+    environment:
+      MYSQL_ROOT_PASSWORD: 000930
+      MYSQL_USER: root
+      MYSQL_PASSWORD: 000930
+      MYSQL_DATABASE: game_logs
+    ports:
+      - "3306:3306"
+    networks:
+      - game-network
+
+  redis:
+    image: redis:latest
+    container_name: redis
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - game-network
+
+networks:
+  game-network:
+
+volumes:
+  mysql-data:

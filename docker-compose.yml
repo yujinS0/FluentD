@@ -1,13 +1,22 @@
-﻿version: '3'
+version: '3'
 
 services:
-  # fluentd:
-  #   image: fluent/fluentd:edge 
-  #   ports:
-  #     - "24224:24224"           
-  #   volumes:
-  #     - ./fluent.conf:/fluentd/etc/fluent.conf
-  #     - ./logs:/fluentd/log
+  fluentd:
+    build:
+      context: ./fluentd
+    networks:
+      - game-network
+    ports:
+      - "24224:24224"
+#  fluentd:
+#    image: fluent/fluentd:edge 
+#    ports:
+#      - "24224:24224" # 추후에 역할 분리 시에 내부 포팅 번호 분리하기 
+#    volumes:
+#      - /mnt/c/Users/SYJ/source/repos/yujinS0/FluentD/fluentd.conf:/fluentd/etc/fluentd.conf
+#      - ./logs:/fluentd/log
+#    networks:
+#      - game-network
 
   mysql:
     image: mysql:8.0
@@ -42,6 +51,7 @@ services:
         start_period: 30s
 
   gameserver:
+    restart: always
     build:
       context: ./gameserver
       dockerfile: Dockerfile
@@ -50,17 +60,19 @@ services:
     depends_on:
       - mysql
       - redis
+      - fluentd
     environment:
       ConnectionStrings__MysqlGameDBConnection: "Server=mysql;Database=gamedb;User=root;Password=000930;"
       ConnectionStrings__MasterDBConnection: "Server=mysql;Database=masterdb;User=root;Password=000930;"
       ConnectionStrings__RedisGameDBConnection: "redis:6379"
     networks:
       - game-network
-    # logging:
-    #   driver: "fluentd"
-    #   options:
-    #     fluentd-address: localhost:24224
-    #     tag: docker.gameserver
+    logging:
+      driver: "fluentd"
+      options:
+        fluentd-address: "localhost:24224"
+        fluentd-async-connect: "true"
+        tag: server.game
   
   hiveserver:
     build:

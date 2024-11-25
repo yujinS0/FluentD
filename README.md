@@ -1,88 +1,88 @@
 # FluentD
-FluentD¸¦ ÅëÇÑ Log Ã³¸® ÇÐ½À ¹× ½Ç½ÀÀ» À§ÇÑ ·¹Æ÷ÁöÅä¸®ÀÔ´Ï´Ù.
+FluentDë¥¼ í†µí•œ Log ì²˜ë¦¬ í•™ìŠµ ë° ì‹¤ìŠµì„ ìœ„í•œ ë ˆí¬ì§€í† ë¦¬ìž…ë‹ˆë‹¤.
 
-- FluentD ÇÐ½À : [Study µð·ºÅä¸®](./Study/)
-- Integrating Fluentd ½Ç½À °úÁ¦
+- FluentD í•™ìŠµ : [Study ë””ë ‰í† ë¦¬](./Study/)
+- Integrating Fluentd ì‹¤ìŠµ ê³¼ì œ
 
 <br> 
 
-## Integrating Fluentd ½Ç½À °úÁ¦
+## Integrating Fluentd ì‹¤ìŠµ ê³¼ì œ
 
-(Docker Container Logs ±â´ÉÀ» È°¿ëÇÏ¿©,)
+(Docker Container Logs ê¸°ëŠ¥ì„ í™œìš©í•˜ì—¬,)
 
-°ÔÀÓ ¼­¹ö¿¡¼­ Ãâ·ÂµÈ ·Î±×¸¦ Fluentd·Î µ¥ÀÌÅÍº£ÀÌ½º¿¡ ÀúÀåÇÕ´Ï´Ù.
+ê²Œìž„ ì„œë²„ì—ì„œ ì¶œë ¥ëœ ë¡œê·¸ë¥¼ Fluentdë¡œ ë°ì´í„°ë² ì´ìŠ¤ì— ì €ìž¥í•©ë‹ˆë‹¤.
 
-- ÀÌ¶§ °ÔÀÓ ¼­¹ö´Â [¿À¸ñ °ÔÀÓ ¼­¹ö](https://github.com/yujinS0/Omok-Game) ·¹Æ÷ÁöÅä¸®¸¦ »ç¿ëÇÕ´Ï´Ù.
+- ì´ë•Œ ê²Œìž„ ì„œë²„ëŠ” [ì˜¤ëª© ê²Œìž„ ì„œë²„](https://github.com/yujinS0/Omok-Game) ë ˆí¬ì§€í† ë¦¬ë¥¼ ì‚¬ìš©í•©ë‹ˆë‹¤.
 
 
 ## Requirements
 
-### 0. ZLogger¸¦ ÅëÇÑ JSON Æ÷¸Ë ÄÜ¼Ö Ãâ·Â
+### 0. ZLoggerë¥¼ í†µí•œ JSON í¬ë§· ì½˜ì†” ì¶œë ¥
 
-ZLogger¸¦ È°¿ëÇÏ¿© ÄÜ¼Ö¿¡ JSON Æ÷¸ËÀ¸·Î ·Î±×°¡ Ãâ·Â µÇµµ·Ï ÇÕ´Ï´Ù.
+ZLoggerë¥¼ í™œìš©í•˜ì—¬ ì½˜ì†”ì— JSON í¬ë§·ìœ¼ë¡œ ë¡œê·¸ê°€ ì¶œë ¥ ë˜ë„ë¡ í•©ë‹ˆë‹¤.
 
-### 1. Flunted¸¦ »ç¿ëÇÏ¿© ·Î±× Àü¼Û
+### 1. Fluntedë¥¼ ì‚¬ìš©í•˜ì—¬ ë¡œê·¸ ì „ì†¡
 
-ÄÁÅ×ÀÌ³ÊÈ­µÈ ¼­¹öÀÇ ÄÜ¼Ö Ãâ·Â¹°ÀÌ fluented·Î Àü¼Û µÇ°ÔÇÕ´Ï´Ù.
+ì»¨í…Œì´ë„ˆí™”ëœ ì„œë²„ì˜ ì½˜ì†” ì¶œë ¥ë¬¼ì´ fluentedë¡œ ì „ì†¡ ë˜ê²Œí•©ë‹ˆë‹¤.
 
-¹æ¹ýÀº Å©°Ô µÎ°¡Áö(a, b)°¡ ÀÖ½À´Ï´Ù.
+ë°©ë²•ì€ í¬ê²Œ ë‘ê°€ì§€(a, b)ê°€ ìžˆìŠµë‹ˆë‹¤.
 
-#### a. local È¯°æ¿¡¼­ fluent-package(°ú°Å td-agent)¸¦ È°¿ë
+#### a. local í™˜ê²½ì—ì„œ fluent-package(ê³¼ê±° td-agent)ë¥¼ í™œìš©
 
-- localÀÌ³ª VM È¯°æ¿¡¼­ fluentd¸¦ ¼³Ä¡ÇÏ¿© Æ¯Á¤ °æ·ÎÀÇ ·Î±×¸¦ ¼öÁýÇÏ´Â ¹æ½Ä
-- µµÄ¿´Â ±âº»ÀûÀ¸·Î ÄÁÅ×ÀÌ³Ê ·Î±×¸¦ `/var/lib/docker/containers/<containers-id>/<containers-id>-json.log`¿¡ ÀúÀå
+- localì´ë‚˜ VM í™˜ê²½ì—ì„œ fluentdë¥¼ ì„¤ì¹˜í•˜ì—¬ íŠ¹ì • ê²½ë¡œì˜ ë¡œê·¸ë¥¼ ìˆ˜ì§‘í•˜ëŠ” ë°©ì‹
+- ë„ì»¤ëŠ” ê¸°ë³¸ì ìœ¼ë¡œ ì»¨í…Œì´ë„ˆ ë¡œê·¸ë¥¼ `/var/lib/docker/containers/<containers-id>/<containers-id>-json.log`ì— ì €ìž¥
 	
-#### b. ÄÁÅ×ÀÌ³ÊÈ­ÇÑ fluent·Î docker container logs Àü¼Û
+#### b. ì»¨í…Œì´ë„ˆí™”í•œ fluentë¡œ docker container logs ì „ì†¡
 
-- docker logging driver¸¦ ÅëÇØ ÄÁÅ×ÀÌ³ÊÈ­ÇÑ fluentd·Î ·Î±×¸¦ Àü¼ÛÇÏ´Â ¹æ½Ä
-- fluentd ¼³Á¤ ÆÄÀÏ¿¡¼­ fluentd-input ÇÃ·¯±×ÀÎÀ» »ç¿ëÇØ ·Î±×¸¦ ¹ÞÀ» ¼ö ÀÖÀ½
+- docker logging driverë¥¼ í†µí•´ ì»¨í…Œì´ë„ˆí™”í•œ fluentdë¡œ ë¡œê·¸ë¥¼ ì „ì†¡í•˜ëŠ” ë°©ì‹
+- fluentd ì„¤ì • íŒŒì¼ì—ì„œ fluentd-input í”ŒëŸ¬ê·¸ì¸ì„ ì‚¬ìš©í•´ ë¡œê·¸ë¥¼ ë°›ì„ ìˆ˜ ìžˆìŒ
 	```xml
 	<source>
-	  @type forward  # forward input ÇÃ·¯±×ÀÎ »ç¿ë
-	  port 24224     # Docker logging driver°¡ Àü¼ÛÇÏ´Â Æ÷Æ®¸¦ ÁöÁ¤ (fluentd ÄÁÅ×ÀÌ³Ê ½ÇÇà ½Ã ¼³Á¤ÇÑ Æ÷Æ®)
-	  bind 0.0.0.0   # ¸ðµç IP·ÎºÎÅÍ ·Î±× ¼ö½Å
+	  @type forward  # forward input í”ŒëŸ¬ê·¸ì¸ ì‚¬ìš©
+	  port 24224     # Docker logging driverê°€ ì „ì†¡í•˜ëŠ” í¬íŠ¸ë¥¼ ì§€ì • (fluentd ì»¨í…Œì´ë„ˆ ì‹¤í–‰ ì‹œ ì„¤ì •í•œ í¬íŠ¸)
+	  bind 0.0.0.0   # ëª¨ë“  IPë¡œë¶€í„° ë¡œê·¸ ìˆ˜ì‹ 
 	</source>
 
-	<match docker.*>  # µµÄ¿¿¡¼­ Àü¼ÛµÈ ·Î±× Ã³¸®
-	  @type stdout    # ·Î±×¸¦ stdoutÀ¸·Î Ãâ·ÂÇÒ ¼öµµ ÀÖ°í, ÇÊ¿äÇÑ °æ¿ì µ¥ÀÌÅÍº£ÀÌ½º·Î Àü¼Û °¡´É
+	<match docker.*>  # ë„ì»¤ì—ì„œ ì „ì†¡ëœ ë¡œê·¸ ì²˜ë¦¬
+	  @type stdout    # ë¡œê·¸ë¥¼ stdoutìœ¼ë¡œ ì¶œë ¥í•  ìˆ˜ë„ ìžˆê³ , í•„ìš”í•œ ê²½ìš° ë°ì´í„°ë² ì´ìŠ¤ë¡œ ì „ì†¡ ê°€ëŠ¥
 	</match>
 	```
 
-### 2. Fluentd¸¦ ÅëÇØ MySQL µ¥ÀÌÅÍº£ÀÌ½º¿¡ ÀúÀå
+### 2. Fluentdë¥¼ í†µí•´ MySQL ë°ì´í„°ë² ì´ìŠ¤ì— ì €ìž¥
 
-ÀÌÈÄ Fluentd ¿¡¼­ ¾Ë¸ÂÀº MySQL µ¥ÀÌÅÍ º£ÀÌ½ºÀÇ Å×ÀÌºí·Î ÀúÀå µÇµµ·Ï ÇÕ´Ï´Ù.
+ì´í›„ Fluentd ì—ì„œ ì•Œë§žì€ MySQL ë°ì´í„° ë² ì´ìŠ¤ì˜ í…Œì´ë¸”ë¡œ ì €ìž¥ ë˜ë„ë¡ í•©ë‹ˆë‹¤.
 
-¿©±â¼­ ÇÙ½ÉÀº ZLogger¸¦ ÅëÇØ »çÀü Æ÷¸ËÆÃµÈ ·Î±×¸¦ ÃÖ¼ÒÀÇ ÇÁ·Î¼¼½ÌÀ¸·Î,
+ì—¬ê¸°ì„œ í•µì‹¬ì€ ZLoggerë¥¼ í†µí•´ ì‚¬ì „ í¬ë§·íŒ…ëœ ë¡œê·¸ë¥¼ ìµœì†Œì˜ í”„ë¡œì„¸ì‹±ìœ¼ë¡œ,
 
-¾Ë¸ÂÀº fluentd ¼³Á¤À» ÅëÇØ MySQL DB·Î ·Î±×°¡ ÀúÀåµÇ´Â°ÍÀÔ´Ï´Ù.
+ì•Œë§žì€ fluentd ì„¤ì •ì„ í†µí•´ MySQL DBë¡œ ë¡œê·¸ê°€ ì €ìž¥ë˜ëŠ”ê²ƒìž…ë‹ˆë‹¤.
 
 <br>
 
-#### ·Î±×·Î ¾Æ·¡ÀÇ ¸ðµ¨ Åë°è °¡´É ÇØ¾ß ÇÕ´Ï´Ù
+#### ë¡œê·¸ë¡œ ì•„ëž˜ì˜ ëª¨ë¸ í†µê³„ ê°€ëŠ¥ í•´ì•¼ í•©ë‹ˆë‹¤
 
 - [ ] Daily Active Users
 - [ ] User-Specific Statistics
-  - [ ] ·Î±×ÀÎ È½¼ö
-  - [ ] °ÔÀÓ ÇÃ·¹ÀÌ È½¼ö
+  - [ ] ë¡œê·¸ì¸ íšŸìˆ˜
+  - [ ] ê²Œìž„ í”Œë ˆì´ íšŸìˆ˜
 - [ ] Time-Based Statistics
-  - [ ] ±â°£ ³» ·Î±×ÀÎ ÀÎ±¸
-  - [ ] ±â°£ ³» ¸ÅÄª ¿äÃ» ¼ö
-  - [ ] ±â°£ ³» ¸ÅÄª ¼º»ç ¼ö (¸ÅÄª ¿äÃ» Áß ¼º»çµÈ °ÍÀÇ °³¼ö)
-  - [ ] ±â°£ ³» °ÔÀÓ ÇÃ·¹ÀÌ ¼ö (Á¤»óÀûÀ¸·Î ³¡³­ game ¼ö)
+  - [ ] ê¸°ê°„ ë‚´ ë¡œê·¸ì¸ ì¸êµ¬
+  - [ ] ê¸°ê°„ ë‚´ ë§¤ì¹­ ìš”ì²­ ìˆ˜
+  - [ ] ê¸°ê°„ ë‚´ ë§¤ì¹­ ì„±ì‚¬ ìˆ˜ (ë§¤ì¹­ ìš”ì²­ ì¤‘ ì„±ì‚¬ëœ ê²ƒì˜ ê°œìˆ˜)
+  - [ ] ê¸°ê°„ ë‚´ ê²Œìž„ í”Œë ˆì´ ìˆ˜ (ì •ìƒì ìœ¼ë¡œ ëë‚œ game ìˆ˜)
 
   
   ---
 
  
- ### ·Î±× ¸ðµ¨ Á¤ÀÇ 
+ ### ë¡œê·¸ ëª¨ë¸ ì •ì˜ 
  
-1. ·Î±×ÀÎ ¼º°ø ½Ã (Daily Active Users)
+1. ë¡œê·¸ì¸ ì„±ê³µ ì‹œ (Daily Active Users)
  
- - ·Î±×ÀÎ ¼º°ø ¿©ºÎ´Â Daily Active Users¿Í ·Î±×ÀÎ È½¼ö Åë°è¿¡ ¿µÇâ
- - ÇÊµå
+ - ë¡œê·¸ì¸ ì„±ê³µ ì—¬ë¶€ëŠ” Daily Active Usersì™€ ë¡œê·¸ì¸ íšŸìˆ˜ í†µê³„ì— ì˜í–¥
+ - í•„ë“œ
     + action : login_success
     + playerId
- - ¿¹½Ã
+ - ì˜ˆì‹œ
     ```json
     {
         "timestamp":"2024-10-17T15:58:55.4085597+09:00",
@@ -94,12 +94,12 @@ ZLogger¸¦ È°¿ëÇÏ¿© ÄÜ¼Ö¿¡ JSON Æ÷¸ËÀ¸·Î ·Î±×°¡ Ãâ·Â µÇµµ·Ï ÇÕ´Ï´Ù.
     }
     ```
   
-2. ¸ÅÄª ¿äÃ» ¼º°ø ½Ã (Time-Based Statistics ±â°£ ³» ¸ÅÄª ¿äÃ» ¼ö)
+2. ë§¤ì¹­ ìš”ì²­ ì„±ê³µ ì‹œ (Time-Based Statistics ê¸°ê°„ ë‚´ ë§¤ì¹­ ìš”ì²­ ìˆ˜)
 
- - ÇÊµå
+ - í•„ë“œ
     + action : match_request
     + playerId
- - ¿¹½Ã
+ - ì˜ˆì‹œ
     ```json
     {
         "timestamp":"2024-10-17T15:58:55.4085597+09:00",
@@ -111,13 +111,13 @@ ZLogger¸¦ È°¿ëÇÏ¿© ÄÜ¼Ö¿¡ JSON Æ÷¸ËÀ¸·Î ·Î±×°¡ Ãâ·Â µÇµµ·Ï ÇÕ´Ï´Ù.
     }
     ``` 
 
- 3. ¸ÅÄª ¼º»ç ½Ã (Time-Based Statistics ±â°£ ³» ¸ÅÄª ¼º»ç ¼ö)
+ 3. ë§¤ì¹­ ì„±ì‚¬ ì‹œ (Time-Based Statistics ê¸°ê°„ ë‚´ ë§¤ì¹­ ì„±ì‚¬ ìˆ˜)
  
- - ÇÊµå
+ - í•„ë“œ
     + action : match_success
     + playerId
  
- - ¿¹½Ã
+ - ì˜ˆì‹œ
     ```json
     {
         "timestamp":"2024-10-17T16:02:27.7802798+09:00",
@@ -129,14 +129,14 @@ ZLogger¸¦ È°¿ëÇÏ¿© ÄÜ¼Ö¿¡ JSON Æ÷¸ËÀ¸·Î ·Î±×°¡ Ãâ·Â µÇµµ·Ï ÇÕ´Ï´Ù.
     }
     ``` 
  
- 4. °ÔÀÓ Á¾·á ½Ã (Time-Based Statistics ±â°£ ³» °ÔÀÓ ÇÃ·¹ÀÌ ¼ö)
+ 4. ê²Œìž„ ì¢…ë£Œ ì‹œ (Time-Based Statistics ê¸°ê°„ ë‚´ ê²Œìž„ í”Œë ˆì´ ìˆ˜)
 
- - ÇÊµå
+ - í•„ë“œ
     + action : game_end
     + winnerId
     + loserId
 
- - ¿¹½Ã
+ - ì˜ˆì‹œ
     ```json
     {
         "timestamp":"2024-10-17T16:02:27.7802798+09:00",
@@ -154,65 +154,65 @@ ZLogger¸¦ È°¿ëÇÏ¿© ÄÜ¼Ö¿¡ JSON Æ÷¸ËÀ¸·Î ·Î±×°¡ Ãâ·Â µÇµµ·Ï ÇÕ´Ï´Ù.
 
  <br>
 
- ### ·Î±× ÀúÀå Å×ÀÌºí ±¸Á¶ Á¤ÀÇ
+ ### ë¡œê·¸ ì €ìž¥ í…Œì´ë¸” êµ¬ì¡° ì •ì˜
 
  ```sql
  create database game_logs;
 
  ```
 
- #### ·Î±×ÀÎ ·Î±× Å×ÀÌºí login_logs
+ #### ë¡œê·¸ì¸ ë¡œê·¸ í…Œì´ë¸” login_logs
 
   ```sql
     CREATE TABLE `game_logs`.`login_logs`(
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        playerId VARCHAR(255) NOT NULL,    -- ÇÃ·¹ÀÌ¾î ID
-        timestamp DATETIME NOT NULL        -- ·Î±×ÀÎ ¹ß»ý ½Ã°£
+        playerId VARCHAR(255) NOT NULL,    -- í”Œë ˆì´ì–´ ID
+        timestamp DATETIME NOT NULL        -- ë¡œê·¸ì¸ ë°œìƒ ì‹œê°„
     );
 
  ```
- - ·Î±×ÀÎ °ü·Ã Á¤º¸¸¦ ±â·ÏÇÏ´Â Å×ÀÌºí. 
- - Daily Active Users ¹× ·Î±×ÀÎ È½¼ö °è»ê¿¡ »ç¿ëµË´Ï´Ù.
+ - ë¡œê·¸ì¸ ê´€ë ¨ ì •ë³´ë¥¼ ê¸°ë¡í•˜ëŠ” í…Œì´ë¸”. 
+ - Daily Active Users ë° ë¡œê·¸ì¸ íšŸìˆ˜ ê³„ì‚°ì— ì‚¬ìš©ë©ë‹ˆë‹¤.
 
 
  
- #### ¸ÅÄª ·Î±× Å×ÀÌºí matching_logs
+ #### ë§¤ì¹­ ë¡œê·¸ í…Œì´ë¸” matching_logs
 
   ```sql
     CREATE TABLE `game_logs`.`matching_logs`(
         id BIGINT AUTO_INCREMENT PRIMARY KEY,
-        playerId VARCHAR(255) NOT NULL,    -- ¸ÅÄªÀ» ¿äÃ»ÇÑ ÇÃ·¹ÀÌ¾î ID
-        timestamp DATETIME NOT NULL,            -- ¸ÅÄª ¿äÃ» ¶Ç´Â ¼º»ç ½Ã°¢
-        tag VARCHAR(50) NOT NULL           -- 'match_request' ¶Ç´Â 'match_success' ±¸ºÐÀ» À§ÇÑ ÅÂ±×
+        playerId VARCHAR(255) NOT NULL,    -- ë§¤ì¹­ì„ ìš”ì²­í•œ í”Œë ˆì´ì–´ ID
+        timestamp DATETIME NOT NULL,            -- ë§¤ì¹­ ìš”ì²­ ë˜ëŠ” ì„±ì‚¬ ì‹œê°
+        tag VARCHAR(50) NOT NULL           -- 'match_request' ë˜ëŠ” 'match_success' êµ¬ë¶„ì„ ìœ„í•œ íƒœê·¸
     );
 
  ```
- - ¸ÅÄª ¿äÃ»°ú ¼º»ç Á¤º¸¸¦ ±â·ÏÇÏ´Â Å×ÀÌºí. 
- - ¸ÅÄª ¿äÃ» ¼ö¿Í ¸ÅÄª ¼º»ç ¼ö Åë°è¿¡ »ç¿ëµË´Ï´Ù.
+ - ë§¤ì¹­ ìš”ì²­ê³¼ ì„±ì‚¬ ì •ë³´ë¥¼ ê¸°ë¡í•˜ëŠ” í…Œì´ë¸”. 
+ - ë§¤ì¹­ ìš”ì²­ ìˆ˜ì™€ ë§¤ì¹­ ì„±ì‚¬ ìˆ˜ í†µê³„ì— ì‚¬ìš©ë©ë‹ˆë‹¤.
 
 
 
- #### °ÔÀÓ ·Î±× Å×ÀÌºí play_logs
+ #### ê²Œìž„ ë¡œê·¸ í…Œì´ë¸” play_logs
 
   ```sql
 	CREATE TABLE `game_logs`.`play_logs`(
 		id BIGINT AUTO_INCREMENT PRIMARY KEY,
-		winnerId VARCHAR(255) NOT NULL,    -- ½ÂÀÚ ID
-		loserId VARCHAR(255) NOT NULL,     -- ÆÐÀÚ ID
-		timestamp DATETIME NOT NULL        -- °ÔÀÓ Á¾·á ½Ã°£
+		winnerId VARCHAR(255) NOT NULL,    -- ìŠ¹ìž ID
+		loserId VARCHAR(255) NOT NULL,     -- íŒ¨ìž ID
+		timestamp DATETIME NOT NULL        -- ê²Œìž„ ì¢…ë£Œ ì‹œê°„
 	);
 
  ```
 
- - °ÔÀÓ °á°ú¸¦ ±â·ÏÇÏ´Â Å×ÀÌºí.
- - °ÔÀÓ ÇÃ·¹ÀÌ ¼ö ¹× °ÔÀÓ ½ÂÆÐ Åë°è¿¡ »ç¿ëµË´Ï´Ù.
+ - ê²Œìž„ ê²°ê³¼ë¥¼ ê¸°ë¡í•˜ëŠ” í…Œì´ë¸”.
+ - ê²Œìž„ í”Œë ˆì´ ìˆ˜ ë° ê²Œìž„ ìŠ¹íŒ¨ í†µê³„ì— ì‚¬ìš©ë©ë‹ˆë‹¤.
 
 ---
 
-### Åë°è Äõ¸® ¿¹½Ã
+### í†µê³„ ì¿¼ë¦¬ ì˜ˆì‹œ
 
 #### 1. **Daily Active Users (DAU)**
-   - Æ¯Á¤ ³¯Â¥¿¡ ·Î±×ÀÎÇÑ °íÀ¯ ÇÃ·¹ÀÌ¾î ¼ö¸¦ °è»êÇÕ´Ï´Ù.
+   - íŠ¹ì • ë‚ ì§œì— ë¡œê·¸ì¸í•œ ê³ ìœ  í”Œë ˆì´ì–´ ìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
 ```sql
 SELECT COUNT(DISTINCT playerId) AS daily_active_users
@@ -220,14 +220,14 @@ FROM login_logs
 WHERE DATE(timestamp) = CURDATE();
 ```
 
-- **¼³¸í**: `DISTINCT`¸¦ »ç¿ëÇÏ¿© Áßº¹ ·Î±×ÀÎÀ» Á¦¿ÜÇÑ °íÀ¯ÇÑ ÇÃ·¹ÀÌ¾î ¼ö¸¦ ±¸ÇÕ´Ï´Ù. ³¯Â¥´Â `CURDATE()`·Î ¿À´ÃÀÇ ³¯Â¥¸¸ ÇÊÅÍ¸µÇÕ´Ï´Ù.
+- **ì„¤ëª…**: `DISTINCT`ë¥¼ ì‚¬ìš©í•˜ì—¬ ì¤‘ë³µ ë¡œê·¸ì¸ì„ ì œì™¸í•œ ê³ ìœ í•œ í”Œë ˆì´ì–´ ìˆ˜ë¥¼ êµ¬í•©ë‹ˆë‹¤. ë‚ ì§œëŠ” `CURDATE()`ë¡œ ì˜¤ëŠ˜ì˜ ë‚ ì§œë§Œ í•„í„°ë§í•©ë‹ˆë‹¤.
 
 
 
 #### 2. **User-Specific Statistics**
 
-##### 2.1 **·Î±×ÀÎ È½¼ö**
-   - °¢ ÇÃ·¹ÀÌ¾îÀÇ ·Î±×ÀÎ È½¼ö¸¦ °è»êÇÕ´Ï´Ù.
+##### 2.1 **ë¡œê·¸ì¸ íšŸìˆ˜**
+   - ê° í”Œë ˆì´ì–´ì˜ ë¡œê·¸ì¸ íšŸìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
 ```sql
 SELECT playerId, COUNT(*) AS login_count
@@ -235,10 +235,10 @@ FROM login_logs
 GROUP BY playerId;
 ```
 
-- **¼³¸í**: °¢ ÇÃ·¹ÀÌ¾îÀÇ `playerId`¸¦ ±âÁØÀ¸·Î ±×·ìÈ­ÇÑ ÈÄ, ·Î±×ÀÎÇÑ È½¼ö¸¦ °è»êÇÕ´Ï´Ù.
+- **ì„¤ëª…**: ê° í”Œë ˆì´ì–´ì˜ `playerId`ë¥¼ ê¸°ì¤€ìœ¼ë¡œ ê·¸ë£¹í™”í•œ í›„, ë¡œê·¸ì¸í•œ íšŸìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
-##### 2.2 **°ÔÀÓ ÇÃ·¹ÀÌ È½¼ö**
-   - °¢ ÇÃ·¹ÀÌ¾îÀÇ °ÔÀÓ ÇÃ·¹ÀÌ È½¼ö¸¦ °è»êÇÕ´Ï´Ù.
+##### 2.2 **ê²Œìž„ í”Œë ˆì´ íšŸìˆ˜**
+   - ê° í”Œë ˆì´ì–´ì˜ ê²Œìž„ í”Œë ˆì´ íšŸìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
 ```sql
 SELECT playerId, COUNT(*) AS play_count
@@ -250,13 +250,13 @@ FROM (
 GROUP BY playerId;
 ```
 
-- **¼³¸í**: `winnerId`¿Í `loserId` ¸ðµÎ¸¦ ÇÏ³ªÀÇ `playerId`·Î ÇÕÄ£ ÈÄ, °¢ ÇÃ·¹ÀÌ¾îÀÇ °ÔÀÓ Âü¿© È½¼ö¸¦ °è»êÇÕ´Ï´Ù. **UNION ALL**À» »ç¿ëÇÏ¿© ½ÂÀÚ¿Í ÆÐÀÚ¸¦ ¸ðµÎ Æ÷ÇÔÇÑ ÈÄ ±×·ìÈ­ÇÕ´Ï´Ù.
+- **ì„¤ëª…**: `winnerId`ì™€ `loserId` ëª¨ë‘ë¥¼ í•˜ë‚˜ì˜ `playerId`ë¡œ í•©ì¹œ í›„, ê° í”Œë ˆì´ì–´ì˜ ê²Œìž„ ì°¸ì—¬ íšŸìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤. **UNION ALL**ì„ ì‚¬ìš©í•˜ì—¬ ìŠ¹ìžì™€ íŒ¨ìžë¥¼ ëª¨ë‘ í¬í•¨í•œ í›„ ê·¸ë£¹í™”í•©ë‹ˆë‹¤.
 
 
 #### 3. **Time-Based Statistics**
 
-##### 3.1 **±â°£ ³» ·Î±×ÀÎ ÀÎ±¸**
-   - Æ¯Á¤ ±â°£ µ¿¾È ·Î±×ÀÎÇÑ °íÀ¯ ÇÃ·¹ÀÌ¾î ¼ö¸¦ °è»êÇÕ´Ï´Ù.
+##### 3.1 **ê¸°ê°„ ë‚´ ë¡œê·¸ì¸ ì¸êµ¬**
+   - íŠ¹ì • ê¸°ê°„ ë™ì•ˆ ë¡œê·¸ì¸í•œ ê³ ìœ  í”Œë ˆì´ì–´ ìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
 ```sql
 SELECT COUNT(DISTINCT playerId) AS unique_logins
@@ -264,10 +264,10 @@ FROM login_logs
 WHERE timestamp BETWEEN '2024-10-01' AND '2024-10-31';
 ```
 
-- **¼³¸í**: `DISTINCT`¸¦ »ç¿ëÇÏ¿© Áßº¹ ·Î±×ÀÎÀ» Á¦¿ÜÇÑ °íÀ¯ÇÑ ÇÃ·¹ÀÌ¾î ¼ö¸¦ ±¸ÇÕ´Ï´Ù. Æ¯Á¤ ±â°£ ³»¿¡ ¹ß»ýÇÑ ·Î±×ÀÎÀ» ÇÊÅÍ¸µÇÕ´Ï´Ù.
+- **ì„¤ëª…**: `DISTINCT`ë¥¼ ì‚¬ìš©í•˜ì—¬ ì¤‘ë³µ ë¡œê·¸ì¸ì„ ì œì™¸í•œ ê³ ìœ í•œ í”Œë ˆì´ì–´ ìˆ˜ë¥¼ êµ¬í•©ë‹ˆë‹¤. íŠ¹ì • ê¸°ê°„ ë‚´ì— ë°œìƒí•œ ë¡œê·¸ì¸ì„ í•„í„°ë§í•©ë‹ˆë‹¤.
 
-##### 3.2 **±â°£ ³» ¸ÅÄª ¿äÃ» ¼ö**
-   - Æ¯Á¤ ±â°£ µ¿¾È ¹ß»ýÇÑ ¸ÅÄª ¿äÃ» ¼ö¸¦ °è»êÇÕ´Ï´Ù.
+##### 3.2 **ê¸°ê°„ ë‚´ ë§¤ì¹­ ìš”ì²­ ìˆ˜**
+   - íŠ¹ì • ê¸°ê°„ ë™ì•ˆ ë°œìƒí•œ ë§¤ì¹­ ìš”ì²­ ìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
 ```sql
 SELECT COUNT(*) AS match_request_count
@@ -276,10 +276,10 @@ WHERE tag = 'match_request'
   AND time BETWEEN '2024-10-01' AND '2024-10-31';
 ```
 
-- **¼³¸í**: ¸ÅÄª ¿äÃ» ÅÂ±×°¡ `"match_request"`ÀÎ ·Î±×¸¸ ÇÊÅÍ¸µÇÏ¿© ¸ÅÄª ¿äÃ» ¼ö¸¦ °è»êÇÕ´Ï´Ù.
+- **ì„¤ëª…**: ë§¤ì¹­ ìš”ì²­ íƒœê·¸ê°€ `"match_request"`ì¸ ë¡œê·¸ë§Œ í•„í„°ë§í•˜ì—¬ ë§¤ì¹­ ìš”ì²­ ìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
-##### 3.3 **±â°£ ³» ¸ÅÄª ¼º»ç ¼ö (¸ÅÄª ¿äÃ» Áß ¼º»çµÈ °ÍÀÇ °³¼ö)**
-   - Æ¯Á¤ ±â°£ µ¿¾È ¸ÅÄª ¿äÃ» Áß ¼º»çµÈ ¸ÅÄª ¼ö¸¦ °è»êÇÕ´Ï´Ù.
+##### 3.3 **ê¸°ê°„ ë‚´ ë§¤ì¹­ ì„±ì‚¬ ìˆ˜ (ë§¤ì¹­ ìš”ì²­ ì¤‘ ì„±ì‚¬ëœ ê²ƒì˜ ê°œìˆ˜)**
+   - íŠ¹ì • ê¸°ê°„ ë™ì•ˆ ë§¤ì¹­ ìš”ì²­ ì¤‘ ì„±ì‚¬ëœ ë§¤ì¹­ ìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
 ```sql
 SELECT COUNT(*) AS match_success_count
@@ -288,10 +288,10 @@ WHERE tag = 'match_success'
   AND time BETWEEN '2024-10-01' AND '2024-10-31';
 ```
 
-- **¼³¸í**: ¸ÅÄª ¼º»ç ÅÂ±×°¡ `"match_success"`ÀÎ ·Î±×¸¸ ÇÊÅÍ¸µÇÏ¿© ¸ÅÄª ¼º»ç ¼ö¸¦ °è»êÇÕ´Ï´Ù.
+- **ì„¤ëª…**: ë§¤ì¹­ ì„±ì‚¬ íƒœê·¸ê°€ `"match_success"`ì¸ ë¡œê·¸ë§Œ í•„í„°ë§í•˜ì—¬ ë§¤ì¹­ ì„±ì‚¬ ìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
-##### 3.4 **±â°£ ³» °ÔÀÓ ÇÃ·¹ÀÌ ¼ö (Á¤»óÀûÀ¸·Î ³¡³­ °ÔÀÓ ¼ö)**
-   - Æ¯Á¤ ±â°£ µ¿¾È Á¾·áµÈ °ÔÀÓ ¼ö¸¦ °è»êÇÕ´Ï´Ù.
+##### 3.4 **ê¸°ê°„ ë‚´ ê²Œìž„ í”Œë ˆì´ ìˆ˜ (ì •ìƒì ìœ¼ë¡œ ëë‚œ ê²Œìž„ ìˆ˜)**
+   - íŠ¹ì • ê¸°ê°„ ë™ì•ˆ ì¢…ë£Œëœ ê²Œìž„ ìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
 ```sql
 SELECT COUNT(*) AS game_play_count
@@ -299,7 +299,7 @@ FROM play_logs
 WHERE timestamp BETWEEN '2024-10-01' AND '2024-10-31';
 ```
 
-- **¼³¸í**: `play_logs` Å×ÀÌºí¿¡¼­ °ÔÀÓ Á¾·á ½Ã°£ÀÌ Æ¯Á¤ ±â°£ ³»¿¡ ÀÖ´Â °ÔÀÓÀÇ °³¼ö¸¦ °è»êÇÕ´Ï´Ù.
+- **ì„¤ëª…**: `play_logs` í…Œì´ë¸”ì—ì„œ ê²Œìž„ ì¢…ë£Œ ì‹œê°„ì´ íŠ¹ì • ê¸°ê°„ ë‚´ì— ìžˆëŠ” ê²Œìž„ì˜ ê°œìˆ˜ë¥¼ ê³„ì‚°í•©ë‹ˆë‹¤.
 
 
 
@@ -312,7 +312,7 @@ WHERE timestamp BETWEEN '2024-10-01' AND '2024-10-31';
 <br>
 
 
-fluentd ¼³Á¤ ÆÄÀÏ ¿¹½Ã
+fluentd ì„¤ì • íŒŒì¼ ì˜ˆì‹œ
 ```xml
 <source>
 	@type forward
@@ -336,36 +336,46 @@ fluentd ¼³Á¤ ÆÄÀÏ ¿¹½Ã
 
 # Feedback
 
-## ZLogger È°¿ë
+## ZLogger í™œìš©
 
 - `BaseController` & `LoggerHelper` 
-   + 2°³ÀÇ Å¬·¡½º°¡ µ¿ÀÏÇÑ ¸ñÀû `ActionLog()` À» ¼öÇàÇÏ°í ÀÖÀ½
-   + µû¶ó¼­ BaseController¸¦ Á¦°ÅÇÏ°í µ¿ÀÏÇÏ°Ô Àü¿ª¿¡¼­ LoggerHelper¸¦ ÀÌ¿ëÇÏµµ·Ï ¼öÁ¤
+   + 2ê°œì˜ í´ëž˜ìŠ¤ê°€ ë™ì¼í•œ ëª©ì  `ActionLog()` ì„ ìˆ˜í–‰í•˜ê³  ìžˆìŒ
+   + ë”°ë¼ì„œ BaseControllerë¥¼ ì œê±°í•˜ê³  ë™ì¼í•˜ê²Œ ì „ì—­ì—ì„œ LoggerHelperë¥¼ ì´ìš©í•˜ë„ë¡ ìˆ˜ì •
 
-## FluentD È°¿ë
+## FluentD í™œìš©
 
-- Buffer »ç¿ë ±ÇÀå
-   + Buffer ÇÃ·¯±×ÀÎÀº Fluentd output plugin ¿¡¼­ »ç¿ëµÇ´Â pluggableÇÑ ±â´É
-   + ·Î±× À¯½Ç ¹æÁö¸¦ À§ÇØ ¾²ÀÌ±â ¶§¹®¿¡ ÇöÀç »ç¿ëµÇ´Â output plugin ¿¡ Àû¿ëÇØ º¸´Â °Í ÃßÃµ
-   + Buffer ´Â ¸Þ¸ð¸® ÇüÅÂ¿Í ÆÄÀÏ ÇüÅÂ µÎ°¡Áö·Î Á¦°øµÇ¸ç, ¸Þ¸ð¸® ¹öÆÛ´Â fluentd Á¾·á ½Ã À¯½Ç µÇ±â ¶§¹®¿¡ ÆÄÀÏ ÇüÅÂ°¡ ÃßÃµ
+- Buffer ì‚¬ìš© ê¶Œìž¥
+   + Buffer í”ŒëŸ¬ê·¸ì¸ì€ Fluentd output plugin ì—ì„œ ì‚¬ìš©ë˜ëŠ” pluggableí•œ ê¸°ëŠ¥
+   + ë¡œê·¸ ìœ ì‹¤ ë°©ì§€ë¥¼ ìœ„í•´ ì“°ì´ê¸° ë•Œë¬¸ì— í˜„ìž¬ ì‚¬ìš©ë˜ëŠ” output plugin ì— ì ìš©í•´ ë³´ëŠ” ê²ƒ ì¶”ì²œ
+   + Buffer ëŠ” ë©”ëª¨ë¦¬ í˜•íƒœì™€ íŒŒì¼ í˜•íƒœ ë‘ê°€ì§€ë¡œ ì œê³µë˜ë©°, ë©”ëª¨ë¦¬ ë²„í¼ëŠ” fluentd ì¢…ë£Œ ì‹œ ìœ ì‹¤ ë˜ê¸° ë•Œë¬¸ì— íŒŒì¼ í˜•íƒœê°€ ì¶”ì²œ
+   + ì„¤ì • ì˜ˆì‹œ (ì°¸ê³ ìžë£Œ : https://docs.fluentd.org/buffer/file )
+       ```xml
+    <match pattern>
+        ...
+        <buffer>
+        @type file
+        path /var/log/fluent/buf
+        </buffer>
+    </match>
+       ```
 
 
-- Secondary »ç¿ë ±ÇÀå
-   + Secondary ÇÃ·¯±×ÀÎÀº Àü¼Û¿¡ ½ÇÆÐÇÑ ·Î±×¸¦ ÁöÁ¤ÇÑ °æ·Î¿¡ ÀúÀåÇÔ
-   + ·Î±× À¯½Ç ¹æÁö ¹× Àü¼Û ½ÇÆÐ ¿øÀÎ ºÐ¼®À» À§ÇØ »ç¿ë ±ÇÀå
+- Secondary ì‚¬ìš© ê¶Œìž¥
+   + Secondary í”ŒëŸ¬ê·¸ì¸ì€ ì „ì†¡ì— ì‹¤íŒ¨í•œ ë¡œê·¸ë¥¼ ì§€ì •í•œ ê²½ë¡œì— ì €ìž¥í•¨
+   + ë¡œê·¸ ìœ ì‹¤ ë°©ì§€ ë° ì „ì†¡ ì‹¤íŒ¨ ì›ì¸ ë¶„ì„ì„ ìœ„í•´ ì‚¬ìš© ê¶Œìž¥
 
 
-- Fluentd ¿ªÇÒ ºÐ¸® ±¸¼º ±ÇÀå
-   + ¼­¹ö¿Í µ¥ÀÌÅÍº£ÀÌ½º°¡ ÁÖ·Î ´Ù¸¥À§Ä¡¿¡ ÀÖ±â ¶§¹®¿¡, 
-     È¿À²ÀûÀ¸·Î ºÎÇÏ¸¦ ºÐ»ê ½ÃÅ°±â À§ÇØ Àü¼Û¿ë Fluentd(Forwarder), °¡°ø ¹× ÀúÀå¿ë Fluentd(Aggregator)°¡ ºÐ¸®µÇ¾î ±¸¼ºµÇ´Â °ÍÀÌ ±ÇÀå
-     + Forwarder : Àü¼Û¿ë Fluentd
-     + Aggregator : °¡°ø ¹× ÀúÀå¿ë Fluentd
+- Fluentd ì—­í•  ë¶„ë¦¬ êµ¬ì„± ê¶Œìž¥
+   + ì„œë²„ì™€ ë°ì´í„°ë² ì´ìŠ¤ê°€ ì£¼ë¡œ ë‹¤ë¥¸ìœ„ì¹˜ì— ìžˆê¸° ë•Œë¬¸ì—, 
+     íš¨ìœ¨ì ìœ¼ë¡œ ë¶€í•˜ë¥¼ ë¶„ì‚° ì‹œí‚¤ê¸° ìœ„í•´ ì „ì†¡ìš© Fluentd(Forwarder), ê°€ê³µ ë° ì €ìž¥ìš© Fluentd(Aggregator)ê°€ ë¶„ë¦¬ë˜ì–´ êµ¬ì„±ë˜ëŠ” ê²ƒì´ ê¶Œìž¥
+     + Forwarder : ì „ì†¡ìš© Fluentd
+     + Aggregator : ê°€ê³µ ë° ì €ìž¥ìš© Fluentd
 
-- @include »ç¿ë ±ÇÀå
-   + µ¥ÀÌÅÍº£ÀÌ½º ÀúÀå½Ã¿¡, Å×ÀÌºíº° DB ¼³Á¤ÀÌ ¹Ýº¹µÇ´Â °ÍÀ» ¹æÁöÇÏ±â À§ÇØ conf ÆÄÀÏÀ» ºÐ¸®ÇÏ¿© @include »ç¿ë ±ÇÀå
+- @include ì‚¬ìš© ê¶Œìž¥
+   + ë°ì´í„°ë² ì´ìŠ¤ ì €ìž¥ì‹œì—, í…Œì´ë¸”ë³„ DB ì„¤ì •ì´ ë°˜ë³µë˜ëŠ” ê²ƒì„ ë°©ì§€í•˜ê¸° ìœ„í•´ conf íŒŒì¼ì„ ë¶„ë¦¬í•˜ì—¬ @include ì‚¬ìš© ê¶Œìž¥
 
 
 
 ## Project & Structure
 
-- UTF-8 Encoding »ç¿ë
+- UTF-8 Encoding ì‚¬ìš©
